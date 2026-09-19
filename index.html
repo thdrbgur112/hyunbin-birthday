@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>오현빈 생일 축하해</title>
+<meta name="theme-color" content="#060a18">
+<meta name="description" content="화면을 탭하면 불꽃놀이가 시작됩니다. 마지막까지 꼭 보세요.">
+
+<!-- 카톡·인스타에 링크 붙여넣을 때 뜨는 미리보기.
+     배포 후 og:image 를 http://... 로 시작하는 전체 주소로 바꾸면 썸네일이 확실히 뜹니다. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="오현빈 생일 축하해">
+<meta property="og:description" content="화면을 탭하면 불꽃놀이가 시작됩니다. 마지막까지 꼭 보세요.">
+<meta property="og:image" content="cover.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500&display=swap">
+
+<style>
+  :root {
+    --night: #060a18;
+    --gold: #ffc24a;
+    --hot: #fff6e2;
+    --ink: #f3ece0;
+    --ink-soft: #b6b3ad;
+    --hair: rgba(255, 194, 74, 0.28);
+    color-scheme: dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  body {
+    background: var(--night);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #stage {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 78% at 50% 104%, rgba(255, 150, 70, 0.16) 0%, rgba(22, 38, 74, 0.55) 34%, rgba(6, 10, 24, 0) 68%),
+      linear-gradient(180deg, #04060f 0%, #060a18 38%, #0a1130 74%, #16264a 100%);
+  }
+
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #stars { z-index: 0; }
+  #fw { z-index: 1; }
+
+  /* ---------- 시작 화면 ---------- */
+  #start {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 22px;
+    padding: 0 24px;
+    text-align: center;
+    background: radial-gradient(70% 55% at 50% 45%, rgba(6, 10, 24, 0.35), rgba(6, 10, 24, 0.86));
+    cursor: pointer;
+    transition: opacity .7s ease;
+  }
+  #start.gone { opacity: 0; pointer-events: none; }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  #start h1 {
+    margin: 0;
+    font-family: 'Black Han Sans', 'IBM Plex Sans KR', sans-serif;
+    font-weight: 400;
+    font-size: clamp(34px, 11vw, 62px);
+    line-height: 1.16;
+    text-wrap: balance;
+    color: var(--hot);
+    text-shadow: 0 0 28px rgba(255, 194, 74, .45), 0 0 68px rgba(255, 106, 61, .28);
+  }
+  #start p {
+    margin: 0;
+    max-width: 30ch;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .tapbtn {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    background: rgba(255, 194, 74, .08);
+    color: var(--gold);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  .tapbtn .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 12px var(--gold);
+  }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0); box-shadow: 0 0 0 rgba(255,194,74,0); }
+    50% { transform: translateY(-4px); box-shadow: 0 14px 38px rgba(255, 194, 74, .16); }
+  }
+
+  /* ---------- 축하 카드 ---------- */
+  #card {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: calc(6% + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 18px);
+    width: min(440px, calc(100% - 40px));
+    padding: 26px 24px 22px;
+    text-align: center;
+    border-radius: 4px;
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+    background: linear-gradient(180deg, rgba(10, 17, 48, .74), rgba(6, 10, 24, .88));
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 1.1s ease, transform 1.1s cubic-bezier(.2, .8, .3, 1);
+  }
+  #card.on { opacity: 1; transform: translate(-50%, 0); }
+  #card h2 {
+    margin: 10px 0 12px;
+    font-family: 'Gowun Batang', serif;
+    font-weight: 700;
+    font-size: clamp(24px, 6.4vw, 32px);
+    color: var(--hot);
+    text-wrap: balance;
+  }
+  #card .msg {
+    margin: 0 auto;
+    max-width: 30ch;
+    font-family: 'Gowun Batang', serif;
+    font-size: 15px;
+    line-height: 1.85;
+    color: #ded7cb;
+  }
+  .actions {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .actions button {
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(243, 236, 224, .2);
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease, color .2s ease;
+  }
+  .actions button:hover { border-color: var(--hair); background: rgba(255, 194, 74, .08); color: var(--gold); }
+  .actions button.primary { border-color: var(--hair); color: var(--gold); }
+  .hint {
+    margin: 14px 0 0;
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: rgba(182, 179, 173, .72);
+  }
+
+  /* ---------- 사운드 토글 ---------- */
+  #sound {
+    position: absolute;
+    z-index: 5;
+    right: 16px;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    width: 42px; height: 42px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(243, 236, 224, .18);
+    background: rgba(6, 10, 24, .5);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  #sound:hover { color: var(--gold); border-color: var(--hair); }
+  #sound svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+  button:focus-visible, #start:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tapbtn { animation: none; }
+    #card { transition-duration: .01ms; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="fw" aria-hidden="true"></canvas>
+
+  <button id="sound" type="button" aria-label="소리 끄기" aria-pressed="true">
+    <svg id="sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+    <svg id="sound-off" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9.5l4 5"/><path d="M21 9.5l-4 5"/></svg>
+  </button>
+
+  <div id="card" role="note">
+    <div class="eyebrow">Happy Birthday</div>
+    <h2>오현빈, 생일 축하해</h2>
+    <p class="msg">오늘 이 하늘에 터진 불꽃만큼<br>환하고 좋은 일만 가득한 하루 보내.<br>오늘의 주인공은 너야.</p>
+    <div class="actions">
+      <button id="replay" type="button" class="primary">다시 보기</button>
+      <button id="copy" type="button">링크 복사</button>
+    </div>
+    <p class="hint" id="hint">링크를 그대로 보내면 누구나 볼 수 있어요</p>
+  </div>
+
+  <div id="start" role="button" tabindex="0" aria-label="불꽃놀이 시작하기">
+    <div class="eyebrow">For 현빈</div>
+    <h1>오현빈을 위한<br>불꽃놀이</h1>
+    <p>소리를 켜고 보면 더 좋아요. 40초쯤 지나면 하늘에 글자가 뜹니다.</p>
+    <span class="tapbtn"><span class="dot"></span>화면을 탭해서 시작</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  var fw = document.getElementById('fw');
+  var starsC = document.getElementById('stars');
+  var ctx = fw.getContext('2d');
+  var sctx = starsC.getContext('2d');
+  var startEl = document.getElementById('start');
+  var cardEl = document.getElementById('card');
+  var soundBtn = document.getElementById('sound');
+  var iconOn = document.getElementById('sound-on');
+  var iconOff = document.getElementById('sound-off');
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var W = 0, H = 0, S = 1, dpr = 1, GROUND = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = stage.clientWidth || window.innerWidth;
+    H = stage.clientHeight || window.innerHeight;
+    [fw, starsC].forEach(function (c) {
+      c.width = Math.round(W * dpr);
+      c.height = Math.round(H * dpr);
+    });
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    S = Math.max(0.55, Math.min(W, H) / 620);
+    GROUND = H * 0.94;
+    drawStars();
+  }
+
+  function drawStars() {
+    sctx.clearRect(0, 0, W, H);
+    var n = Math.round((W * H) / 5200);
+    for (var i = 0; i < n; i++) {
+      var x = Math.random() * W;
+      var y = Math.random() * H * 0.86;
+      var a = (1 - y / (H * 0.86)) * 0.55 + 0.08;
+      var r = Math.random() < 0.08 ? 1.5 : 0.8;
+      sctx.globalAlpha = a * (0.35 + Math.random() * 0.65);
+      sctx.fillStyle = Math.random() < 0.2 ? '#cfe0ff' : '#fff4e0';
+      sctx.beginPath();
+      sctx.arc(x, y, r, 0, 6.2832);
+      sctx.fill();
+    }
+    sctx.globalAlpha = 1;
+  }
+
+  /* 불꽃 색 — 실제 연화에 쓰이는 금속염 색에서 가져왔다.
+     스트론튬 적, 나트륨 금, 바륨 녹, 구리 청, 마그네슘 백. */
+  var COLORS = [
+    [255, 58, 70], [255, 124, 32], [255, 196, 72], [255, 244, 176],
+    [120, 255, 110], [60, 240, 210], [88, 150, 255], [190, 96, 255],
+    [255, 110, 190], [238, 255, 255]
+  ];
+  var GOLD = [255, 190, 80];
+  var WHITE = [255, 255, 245];
+
+  var MAX = 2600;
+  var parts = [], rockets = [], flashes = [], glyphs = [];
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function pick(a) { return a[(Math.random() * a.length) | 0]; }
+
+  // kind: 0 보통, 1 꼬리, 2 크로셋, 3 2단 폭발, 4 스트로브, 5 버들
+  function Part(x, y, vx, vy, life, c, drag, grav, kind) {
+    return {
+      x: x, y: y, vx: vx, vy: vy,
+      life: life, span: life,
+      r: c[0], g: c[1], b: c[2],
+      drag: drag === undefined ? 0.965 : drag,
+      grav: grav === undefined ? 0.052 : grav,
+      kind: kind || 0,
+      seed: Math.random() * 6.283
+    };
+  }
+
+  // 구면에서 방향을 뽑아 평면에 투영 — 가장자리가 밝은 진짜 화구 모양이 된다
+  function sphere(speed) {
+    var u = rnd(-1, 1), t = rnd(0, 6.283185);
+    var s = Math.sqrt(1 - u * u) * speed * S;
+    return [Math.cos(t) * s, Math.sin(t) * s];
+  }
+
+  function flash(x, y, radius, c) {
+    flashes.push({ x: x, y: y, r: radius * S, life: 6, span: 6, c: c });
+  }
+
+  function launch(kind, tx) {
+    var x = tx === undefined ? rnd(W * 0.12, W * 0.88) : tx;
+    var target = rnd(H * 0.14, H * 0.46);
+    var g = 0.09;
+    rockets.push({
+      x: x, y: GROUND, vx: rnd(-0.4, 0.4), vy: -Math.sqrt(2 * g * (GROUND - target)), g: g,
+      target: target,
+      kind: kind || pickKind(),
+      c: pick(COLORS)
+    });
+    boom(0.1, 220, 0.04);
+  }
+
+  function pickKind() {
+    return pick(['peony', 'peony', 'chrysanthemum', 'chrysanthemum', 'willow',
+                 'ring', 'palm', 'crossette', 'multibreak', 'strobe',
+                 'heart', 'saturn', 'spiral']);
+  }
+
+  function explode(x, y, kind, c) {
+    if (parts.length > MAX) return;
+    var second = pick(COLORS);
+    while (second === c) second = pick(COLORS);
+    var i, a, sp, d;
+
+    if (kind === 'peony') {
+      for (i = 0; i < 110; i++) {
+        d = sphere(rnd(0.5, 2.6));
+        parts.push(Part(x, y, d[0], d[1], (26 + Math.random() * 20) | 0,
+          Math.random() < 0.85 ? c : second));
+      }
+      flash(x, y, 26, c);
+
+    } else if (kind === 'chrysanthemum') {
+      for (i = 0; i < 82; i++) {
+        d = sphere(rnd(0.6, 2.6));
+        parts.push(Part(x, y, d[0], d[1], (34 + Math.random() * 20) | 0, c, 0.965, 0.052, 1));
+      }
+      flash(x, y, 28, c);
+
+    } else if (kind === 'willow') {
+      for (i = 0; i < 62; i++) {
+        d = sphere(rnd(0.4, 1.5));
+        parts.push(Part(x, y, d[0], d[1] * 0.7, (66 + Math.random() * 34) | 0, GOLD, 0.992, 0.062, 5));
+      }
+      flash(x, y, 22, GOLD);
+
+    } else if (kind === 'ring') {
+      var tilt = rnd(0.25, 0.95), rot = rnd(0, 3.14), rs = rnd(1.4, 2.0) * S;
+      for (i = 0; i < 130; i++) {
+        a = i / 130 * 6.283185;
+        var rx = Math.cos(a) * rs, ry = Math.sin(a) * rs * tilt;
+        parts.push(Part(x, y, rx * Math.cos(rot) - ry * Math.sin(rot),
+          rx * Math.sin(rot) + ry * Math.cos(rot), (30 + Math.random() * 12) | 0, c, 0.975));
+      }
+      for (i = 0; i < 34; i++) {
+        d = sphere(rnd(0.2, 0.7));
+        parts.push(Part(x, y, d[0], d[1], (20 + Math.random() * 12) | 0, second));
+      }
+      flash(x, y, 24, c);
+
+    } else if (kind === 'palm') {
+      var fronds = 8 + ((Math.random() * 4) | 0), base = rnd(0, 6.283);
+      for (i = 0; i < fronds; i++) {
+        a = base + i / fronds * 6.283185 + rnd(-0.12, 0.12);
+        sp = rnd(1.9, 2.7) * S;
+        for (var k = 0; k < 9; k++) {
+          var j = 1 - k * 0.055;
+          parts.push(Part(x, y, Math.cos(a) * sp * j, Math.sin(a) * sp * j,
+            (46 + Math.random() * 20) | 0, GOLD, 0.987, 0.056, 1));
+        }
+      }
+      flash(x, y, 30, GOLD);
+
+    } else if (kind === 'crossette') {
+      for (i = 0; i < 30; i++) {
+        d = sphere(rnd(1.0, 2.0));
+        parts.push(Part(x, y, d[0], d[1], (22 + Math.random() * 8) | 0, c, 0.965, 0.052, 2));
+      }
+      flash(x, y, 22, c);
+
+    } else if (kind === 'multibreak') {
+      for (i = 0; i < 5; i++) {
+        d = sphere(rnd(0.9, 1.8));
+        parts.push(Part(x, y, d[0], d[1], (16 + Math.random() * 12) | 0, pick(COLORS), 0.965, 0.052, 3));
+      }
+      flash(x, y, 18, WHITE);
+
+    } else if (kind === 'strobe') {
+      for (i = 0; i < 90; i++) {
+        d = sphere(rnd(0.5, 2.2));
+        parts.push(Part(x, y, d[0], d[1], (40 + Math.random() * 30) | 0,
+          Math.random() < 0.6 ? WHITE : c, 0.97, 0.05, 4));
+      }
+      flash(x, y, 27, WHITE);
+
+    } else if (kind === 'heart') {
+      var sc = rnd(0.085, 0.115) * S;
+      for (i = 0; i < 170; i++) {
+        var t = i / 170 * 6.283185;
+        var hx = 16 * Math.pow(Math.sin(t), 3);
+        var hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        parts.push(Part(x, y, hx * sc, hy * sc, (34 + Math.random() * 14) | 0, c, 0.977));
+      }
+      flash(x, y, 26, c);
+
+    } else if (kind === 'saturn') {
+      for (i = 0; i < 80; i++) {
+        d = sphere(rnd(0.3, 1.3));
+        parts.push(Part(x, y, d[0], d[1], (26 + Math.random() * 14) | 0, c));
+      }
+      var tl = rnd(0.15, 0.4), rsp = 2.0 * S;
+      for (i = 0; i < 110; i++) {
+        a = i / 110 * 6.283185;
+        parts.push(Part(x, y, Math.cos(a) * rsp, Math.sin(a) * rsp * tl,
+          (32 + Math.random() * 12) | 0, second, 0.975));
+      }
+      flash(x, y, 28, c);
+
+    } else if (kind === 'spiral') {
+      var arms = 3 + ((Math.random() * 3) | 0);
+      for (i = 0; i < 170; i++) {
+        var f = i / 170;
+        a = f * 6.283185 * arms + rnd(-0.05, 0.05);
+        sp = (0.4 + f * 2.1) * S;
+        parts.push(Part(x, y, Math.cos(a) * sp, Math.sin(a) * sp,
+          (30 + Math.random() * 16) | 0, i % 2 ? c : second, 0.978));
+      }
+      flash(x, y, 26, c);
+    }
+
+    boom(0.5, 90, 0.5);
+  }
+
+  /* 글자 불꽃 — 안 보이는 캔버스에 글자를 찍어 픽셀을 샘플링한 뒤,
+     한 점에서 출발한 입자가 각자의 자리로 날아가 글자를 이룬다. */
+  var off = document.createElement('canvas');
+  var octx = off.getContext('2d', { willReadFrequently: true });
+
+  function textPoints(text, maxW, maxH) {
+    off.width = Math.max(64, Math.round(maxW));
+    off.height = Math.max(64, Math.round(maxH));
+    octx.clearRect(0, 0, off.width, off.height);
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+
+    var fit = function (px) {
+      octx.font = '400 ' + px + "px 'Black Han Sans', 'IBM Plex Sans KR', sans-serif";
+      return octx.measureText(text).width;
+    };
+    var size = Math.min(off.height * 0.72, 260), guard = 0;
+    while (fit(size) > off.width * 0.9 && size > 12 && guard++ < 60) size *= 0.92;
+
+    octx.fillStyle = '#fff';
+    octx.fillText(text, off.width / 2, off.height / 2);
+
+    var img = octx.getImageData(0, 0, off.width, off.height).data;
+    var step = Math.max(3, Math.round(size / 22));
+    var pts = [];
+    for (var y = 0; y < off.height; y += step) {
+      for (var x = 0; x < off.width; x += step) {
+        if (img[(y * off.width + x) * 4 + 3] > 140) {
+          pts.push([x + rnd(-0.8, 0.8), y + rnd(-0.8, 0.8)]);
+        }
+      }
+    }
+    for (var i = pts.length - 1; i > 0; i--) {
+      var j = (Math.random() * (i + 1)) | 0, tmp = pts[i]; pts[i] = pts[j]; pts[j] = tmp;
+    }
+    return pts.slice(0, 760);
+  }
+
+  function writeSky(text, cy, colorA, colorB, hold) {
+    var boxW = W * 0.94, boxH = Math.min(H * 0.34, W * 0.42);
+    var pts = textPoints(text, boxW, boxH);
+    if (!pts.length) return;
+    var ox = (W - boxW) / 2, oy = cy - boxH / 2;
+    var sx = W / 2, sy = cy;
+
+    flash(sx, cy, 34, colorA);
+    boom(0.85, 70, 0.7);
+
+    for (var i = 0; i < pts.length; i++) {
+      var mix = Math.random();
+      var c = mix < 0.62 ? colorA : (mix < 0.9 ? colorB : WHITE);
+      glyphs.push({
+        sx: sx + rnd(-8, 8), sy: sy + rnd(-8, 8),
+        tx: ox + pts[i][0], ty: oy + pts[i][1],
+        x: sx, y: sy, vx: 0, vy: 0,
+        t: -((Math.random() * 6) | 0),
+        fly: 22 + ((Math.random() * 10) | 0),
+        hold: hold,
+        phase: 0,
+        r: c[0], g: c[1], b: c[2],
+        seed: Math.random() * 6.283,
+        alpha: 1
+      });
+    }
+  }
+
+  function updateGlyphs() {
+    var out = [];
+    for (var i = 0; i < glyphs.length; i++) {
+      var p = glyphs[i];
+      p.t++;
+      if (p.t < 0) { out.push(p); continue; }
+
+      if (p.phase === 0) {
+        var k = Math.min(1, p.t / p.fly);
+        var e = 1 - Math.pow(1 - k, 3);
+        p.x = p.sx + (p.tx - p.sx) * e;
+        p.y = p.sy + (p.ty - p.sy) * e;
+        if (k >= 1) { p.phase = 1; p.t = 0; }
+      } else if (p.phase === 1) {
+        p.x = p.tx + Math.sin(frame * 0.08 + p.seed) * 0.7;
+        p.y = p.ty + Math.cos(frame * 0.07 + p.seed * 1.7) * 0.7;
+        if (p.t > p.hold) {
+          p.phase = 2; p.t = 0;
+          p.vx = rnd(-0.5, 0.5);
+          p.vy = rnd(-0.4, 0.2);
+        }
+      } else {
+        p.vy += 0.055;
+        p.vx *= 0.99;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.016;
+        if (p.alpha <= 0) continue;
+      }
+
+      var b = (p.phase === 0 ? 0.75 + 0.35 * Math.sin(frame * 0.4 + p.seed)
+                             : 0.85 + 0.25 * Math.sin(frame * 0.22 + p.seed)) * p.alpha;
+      dot(p.x, p.y, p.r * b, p.g * b, p.b * b, p.phase === 1 ? 2.1 : 1.7);
+      out.push(p);
+    }
+    glyphs = out;
+  }
+
+  /* ---------------------------- 렌더 ---------------------------- */
+  var frame = 0;
+
+  function dot(x, y, r, g, b, rad) {
+    ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+    ctx.beginPath();
+    ctx.arc(x, y, rad, 0, 6.2832);
+    ctx.fill();
+  }
+
+  function step() {
+    // 잔광: 앞 프레임을 조금씩 지워 배경 하늘이 비치게 한다
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0,0,0,' + (reduced ? 0.4 : 0.19) + ')';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+
+    var i, p;
+
+    for (i = rockets.length - 1; i >= 0; i--) {
+      var r = rockets[i];
+      r.x += r.vx; r.y += r.vy; r.vy += r.g;
+      if (r.y <= r.target || r.vy >= -0.4) {
+        explode(r.x, r.y, r.kind, r.c);
+        rockets.splice(i, 1);
+        continue;
+      }
+      dot(r.x, r.y, 255, 210, 150, 1.7);
+      if (parts.length < MAX) {
+        parts.push(Part(r.x + rnd(-1, 1), r.y + 2, rnd(-0.25, 0.25), rnd(0, 0.5),
+          (5 + Math.random() * 8) | 0, [255, 170, 60], 0.9, 0.02));
+      }
+    }
+
+    var alive = [], spawn = [];
+    for (i = 0; i < parts.length; i++) {
+      p = parts[i];
+      p.vx *= p.drag;
+      p.vy = p.vy * p.drag + p.grav;
+      p.x += p.vx; p.y += p.vy;
+      p.life--;
+
+      if (p.life <= 0) {
+        if (p.kind === 2) {
+          for (var a = 0; a < 4; a++) {
+            var ang = a * 1.5708, sp = rnd(0.7, 1.1) * S;
+            spawn.push(Part(p.x, p.y, Math.cos(ang) * sp, Math.sin(ang) * sp,
+              (14 + Math.random() * 8) | 0, [p.r, p.g, p.b]));
+          }
+        } else if (p.kind === 3) {
+          explode(p.x, p.y, 'peony', [p.r, p.g, p.b]);
+        }
+        continue;
+      }
+      if (p.y > H + 30 || p.x < -40 || p.x > W + 40) continue;
+
+      var f = p.life / p.span, b;
+      if (p.kind === 4) {
+        b = Math.sin(frame * 0.9 + p.seed) > 0.3 ? 1.2 : 0.1;
+      } else if (p.kind === 5) {
+        b = Math.pow(f, 0.55) * (0.75 + 0.45 * Math.sin(frame * 0.5 + p.seed));
+      } else {
+        b = Math.pow(f, 0.75);
+        if (f > 0.9) b += (f - 0.9) * 4;
+      }
+      if (p.y > GROUND) b *= Math.max(0, 1 - (p.y - GROUND) / 40);
+
+      dot(p.x, p.y, p.r * b, p.g * b, p.b * b, p.kind === 5 ? 1.5 : 1.6);
+
+      if ((p.kind === 1 || p.kind === 5) && (p.life & 1) === 0 && f > 0.25 && parts.length < MAX) {
+        spawn.push(Part(p.x, p.y, p.vx * 0.2 + rnd(-0.12, 0.12), p.vy * 0.2,
+          (8 + Math.random() * 10) | 0,
+          p.kind === 5 ? [255, 200, 120] : [p.r, p.g, p.b], 0.93, 0.03));
+      }
+      alive.push(p);
+    }
+    parts = alive.concat(spawn);
+    if (parts.length > MAX) parts.length = MAX;
+
+    for (i = flashes.length - 1; i >= 0; i--) {
+      var fl = flashes[i];
+      var kk = fl.life / fl.span;
+      var rad = fl.r * (1.5 - kk);
+      var grd = ctx.createRadialGradient(fl.x, fl.y, 0, fl.x, fl.y, rad);
+      var al = kk * kk * 0.5;
+      grd.addColorStop(0, 'rgba(' + fl.c[0] + ',' + fl.c[1] + ',' + fl.c[2] + ',' + al + ')');
+      grd.addColorStop(1, 'rgba(' + fl.c[0] + ',' + fl.c[1] + ',' + fl.c[2] + ',0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(fl.x, fl.y, rad, 0, 6.2832);
+      ctx.fill();
+      fl.life--;
+      if (fl.life <= 0) flashes.splice(i, 1);
+    }
+
+    updateGlyphs();
+
+    ctx.globalCompositeOperation = 'source-over';
+    frame++;
+  }
+
+  /* ---------------------------- 소리 ---------------------------- */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ac = null, master = null, muted = false;
+
+  function audioInit() {
+    if (ac || !AC) return;
+    try {
+      ac = new AC();
+      master = ac.createGain();
+      master.gain.value = 0.9;
+      var comp = ac.createDynamicsCompressor();
+      master.connect(comp);
+      comp.connect(ac.destination);
+    } catch (e) { ac = null; }
+  }
+
+  function note(freq, at, dur, vol) {
+    if (!ac || muted) return;
+    var t = ac.currentTime + at;
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    var o1 = ac.createOscillator();
+    o1.type = 'triangle';
+    o1.frequency.value = freq;
+    var o2 = ac.createOscillator();
+    o2.type = 'sine';
+    o2.frequency.value = freq * 2;
+    var g2 = ac.createGain();
+    g2.gain.value = 0.28;
+    o2.connect(g2); g2.connect(g);
+    o1.connect(g);
+    g.connect(master);
+    o1.start(t); o2.start(t);
+    o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+
+  var lastBoom = 0;
+  function boom(vol, freq, dur) {
+    if (!ac || muted) return;
+    var now = performance.now();
+    if (now - lastBoom < 70) return;
+    lastBoom = now;
+    var t = ac.currentTime;
+    var len = Math.max(0.05, dur);
+    var buf = ac.createBuffer(1, Math.floor(ac.sampleRate * len), ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) {
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.2);
+    }
+    var src = ac.createBufferSource();
+    src.buffer = buf;
+    var lp = ac.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(freq * 3, t);
+    lp.frequency.exponentialRampToValueAtTime(Math.max(40, freq), t + len);
+    var g = ac.createGain();
+    g.gain.value = vol * 0.22;
+    src.connect(lp); lp.connect(g); g.connect(master);
+    src.start(t);
+  }
+
+  var N = { G4: 392.00, A4: 440.00, B4: 493.88, C5: 523.25, D5: 587.33,
+            E5: 659.25, F5: 698.46, G5: 783.99 };
+  var MELODY = [
+    ['G4', .5], ['G4', .5], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2],
+    ['G4', .5], ['G4', .5], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2],
+    ['G4', .5], ['G4', .5], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2],
+    ['F5', .5], ['F5', .5], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 3]
+  ];
+  var BEAT = 0.44;
+
+  function playMelody(offset) {
+    if (!ac) return;
+    var t = offset;
+    for (var i = 0; i < MELODY.length; i++) {
+      var len = MELODY[i][1] * BEAT;
+      note(N[MELODY[i][0]], t, Math.max(0.22, len * 0.92), 0.16);
+      t += len;
+    }
+  }
+
+  function fanfare(offset) {
+    if (!ac) return;
+    var chord = [N.C5, N.E5, N.G5, N.C5 * 2];
+    for (var i = 0; i < chord.length; i++) note(chord[i], offset + i * 0.09, 2.6, 0.15);
+  }
+
+  soundBtn.addEventListener('click', function () {
+    muted = !muted;
+    if (master) master.gain.value = muted ? 0 : 0.9;
+    iconOn.hidden = muted;
+    iconOff.hidden = !muted;
+    soundBtn.setAttribute('aria-pressed', String(!muted));
+    soundBtn.setAttribute('aria-label', muted ? '소리 켜기' : '소리 끄기');
+  });
+
+  /* ---------------------------- 쇼 진행 ---------------------------- */
+  var t0 = 0, nextLaunch = 0, timers = [], running = false;
+
+  function pace(sec) {
+    if (sec < 7) return [820, 1200];
+    if (sec < 15) return [480, 760];
+    if (sec < 22) return [260, 420];
+    if (sec < 26.5) return [95, 170];
+    if (sec < 28.5) return [99999, 99999];   // 숨 고르기
+    if (sec < 41) return [1400, 2200];       // 글자 쓰는 동안은 조용히
+    return [700, 1500];                      // 끝난 뒤에도 은은하게 계속
+  }
+
+  function loop() {
+    if (!running) return;
+    var now = performance.now();
+    var sec = (now - t0) / 1000;
+
+    if (now > nextLaunch) {
+      var pc = pace(sec);
+      launch();
+      if (sec > 15 && sec < 27 && Math.random() < 0.55) launch();
+      if (sec > 22 && sec < 26.5 && Math.random() < 0.5) launch();
+      nextLaunch = now + rnd(pc[0], pc[1]);
+    }
+
+    step();
+    requestAnimationFrame(loop);
+  }
+
+  function at(sec, fn) { timers.push(setTimeout(fn, sec * 1000)); }
+
+  function runShow() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    parts = []; rockets = []; flashes = []; glyphs = [];
+    cardEl.classList.remove('on');
+    t0 = performance.now();
+    nextLaunch = t0 + 400;
+
+    if (ac) { playMelody(1.2); playMelody(14.0); }
+
+    at(29.0, function () { writeSky('오현빈', H * 0.34, [255, 196, 72], [255, 124, 32], 150); });
+    at(30.2, function () { fanfare(0); });
+    at(35.0, function () { writeSky('생일 축하해', H * 0.42, [255, 110, 190], [190, 96, 255], 165); });
+    at(36.0, function () { fanfare(0.1); });
+    at(41.5, function () {
+      cardEl.classList.add('on');
+      for (var i = 0; i < 3; i++) setTimeout(launch, i * 220);
+    });
+
+    if (!running) { running = true; requestAnimationFrame(loop); }
+  }
+
+  function startShow() {
+    audioInit();
+    if (ac && ac.state === 'suspended') ac.resume();
+    startEl.classList.add('gone');
+    setTimeout(function () { startEl.hidden = true; }, 750);
+    runShow();
+  }
+
+  startEl.addEventListener('click', startShow);
+  startEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startShow(); }
+  });
+
+  document.getElementById('replay').addEventListener('click', function () {
+    if (ac && ac.state === 'suspended') ac.resume();
+    runShow();
+  });
+
+  var hint = document.getElementById('hint');
+  document.getElementById('copy').addEventListener('click', function () {
+    var done = function (ok) {
+      hint.textContent = ok ? '링크를 복사했어요. 카톡에 붙여넣으면 끝!'
+                            : '주소창의 링크를 복사해서 보내주세요';
+      setTimeout(function () { hint.textContent = '링크를 그대로 보내면 누구나 볼 수 있어요'; }, 3200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(location.href).then(function () { done(true); }, function () { done(false); });
+    } else { done(false); }
+  });
+
+  // 보는 사람이 화면을 탭하면 그 자리에서 한 발 더
+  fw.addEventListener('pointerdown', function (e) {
+    if (!running) return;
+    var rect = fw.getBoundingClientRect();
+    launch(null, e.clientX - rect.left);
+  });
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  // 글자 샘플링 전에 폰트를 먼저 받아둔다
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load("400 100px 'Black Han Sans'", '오현빈 생일 축하해');
+  }
+
+  // 시작 화면 뒤로 한 발 미리 터뜨려 하늘이 비어 보이지 않게
+  ctx.globalCompositeOperation = 'lighter';
+  explode(W * 0.5, H * 0.32, 'peony', [255, 196, 72]);
+  (function preview(n) {
+    step();
+    if (n < 70 && !running) requestAnimationFrame(function () { preview(n + 1); });
+  })(0);
+})();
+</script>
+</body>
+</html>
